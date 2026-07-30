@@ -46,14 +46,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit + integration tests
-        run: pnpm --filter @wa/server test -- --coverage
+      - name: Backend tests (with coverage)
+        run: pnpm --filter @wa/server test:cov
 
-      - name: Pact consumer test (writes packages/web/pacts/*.json)
-        run: pnpm --filter @wa/web test:pact
+      - name: Frontend tests (unit + Pact consumer — regenerates packages/web/pacts/*.json)
+        run: pnpm --filter @wa/web test
 
       - name: Pact provider verification
-        run: pnpm --filter @wa/server test -- tests/pact/verify.test.ts
+        run: pnpm --filter @wa/server exec jest tests/pact/verify.test.ts
 
       - name: Upload coverage
         if: always()

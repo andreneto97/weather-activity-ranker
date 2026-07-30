@@ -1,30 +1,25 @@
-# Fly.io app configuration. Single-container deploy (backend serves the SPA
-# too). Free tier: 1 shared-cpu-1x VM, auto-stop when idle to stay inside
-# monthly hours. Deploy with:
+# fly.toml app configuration file generated for weather-activity-ranker on 2026-07-30T15:35:27-03:00
 #
-#   fly launch --copy-config --no-deploy       # first time only
-#   fly secrets set ANTHROPIC_API_KEY=…        # optional, for Claude Haiku
-#   fly deploy
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
-# See specs/00-overview.spec.md §Deployment.
 
 app = 'weather-activity-ranker'
-primary_region = 'gru'   # São Paulo — closest Fly region to Brazil
+primary_region = 'gru'
 
 [build]
   dockerfile = 'Dockerfile'
 
 [env]
-  NODE_ENV = 'production'
-  PORT = '8080'
-  LOG_LEVEL = 'info'
-  OPEN_METEO_MODE = 'live'
-  OPEN_METEO_TIMEOUT_MS = '3000'
-  CORS_ORIGIN = 'https://weather-activity-ranker.fly.dev'
-  CACHE_TTL_WEATHER_MS = '1800000'
-  CACHE_TTL_MARINE_MS = '1800000'
   CACHE_TTL_AQI_MS = '1800000'
   CACHE_TTL_GEOCODING_MS = '86400000'
+  CACHE_TTL_MARINE_MS = '1800000'
+  CACHE_TTL_WEATHER_MS = '1800000'
+  CORS_ORIGIN = 'https://weather-activity-ranker.fly.dev'
+  LOG_LEVEL = 'info'
+  NODE_ENV = 'production'
+  OPEN_METEO_MODE = 'live'
+  OPEN_METEO_TIMEOUT_MS = '3000'
+  PORT = '8080'
   RATE_LIMIT_MAX = '60'
   RATE_LIMIT_WINDOW_MS = '60000'
   SUMMARIZER_DAILY_CAP = '100'
@@ -32,7 +27,6 @@ primary_region = 'gru'   # São Paulo — closest Fly region to Brazil
 [http_service]
   internal_port = 8080
   force_https = true
-  # Auto-stop on idle → free tier friendliness. Cold-start is ~1s.
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
@@ -55,3 +49,4 @@ primary_region = 'gru'   # São Paulo — closest Fly region to Brazil
   memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 512
