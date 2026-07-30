@@ -2,7 +2,7 @@
 
 Type a city — get a 7-day desirability score for **skiing**, **surfing**, **outdoor sightseeing** and **indoor sightseeing**, grounded in real weather + marine + air-quality data.
 
-> **Live demo:** _pending first deploy (Fly.io) — update after `fly launch`_
+> **Live demo:** [weather-activity-ranker.fly.dev](https://weather-activity-ranker.fly.dev) — Fly.io, `gru` region. Cold-starts in ~1 s if idle.
 >
 > Backend, frontend and contracts in one repo. TypeScript strict everywhere. Backend serves the SPA in prod (single-container).
 
