@@ -53,6 +53,8 @@ jobs:
         run: pnpm --filter @wa/web test
 
       - name: Pact provider verification
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
         run: pnpm --filter @wa/server exec jest tests/pact/verify.test.ts
 
       - name: Upload coverage

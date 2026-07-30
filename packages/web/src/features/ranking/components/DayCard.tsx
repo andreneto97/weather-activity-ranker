@@ -47,7 +47,11 @@ export function DayCard({ day, timezone, isBest, isSelected, onSelect }: DayCard
         : {})}
     >
       {isBest ? (
-        <span className="absolute -top-2 right-3 rounded-full bg-[var(--activity-primary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
+        // Dark chip + white text = 21:1 contrast (WCAG AA on any palette).
+        // The activity color would give ~2.7:1 (fails AA); the dot preserves
+        // the palette tie-in visually while the text stays readable.
+        <span className="absolute -top-2 right-3 flex items-center gap-1.5 rounded-full bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white shadow-sm">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--activity-primary)]" />
           Best
         </span>
       ) : null}
