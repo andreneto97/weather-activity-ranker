@@ -1,0 +1,55 @@
+{
+  "name": "@wa/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Weather Activity Ranker — Node/GraphQL backend",
+  "main": "./dist/main.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/main.ts",
+    "dev:mock": "OPEN_METEO_MODE=stub tsx watch --env-file-if-exists=../../.env src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "build:schema": "tsx src/scripts/emit-schema.ts",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.1",
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/fastify": "^3.0.0",
+    "@escape.tech/graphql-armor-max-aliases": "^2.6.2",
+    "@escape.tech/graphql-armor-max-depth": "^2.4.2",
+    "@fastify/cors": "^10.0.1",
+    "@fastify/helmet": "^12.0.1",
+    "@fastify/rate-limit": "^10.1.1",
+    "@fastify/static": "^10.1.2",
+    "@pothos/core": "^4.3.0",
+    "fastify": "^5.1.0",
+    "fastify-plugin": "^5.0.1",
+    "graphql": "^16.9.0",
+    "lru-cache": "^11.0.2",
+    "p-limit": "^6.1.0",
+    "pino": "^9.5.0",
+    "undici": "^7.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.0.0",
+    "@pact-foundation/pact": "^17.0.1",
+    "@swc/core": "^1.9.3",
+    "@swc/jest": "^0.2.37",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
+    "fast-check": "^3.23.1",
+    "jest": "^30.0.0",
+    "pino-pretty": "^11.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

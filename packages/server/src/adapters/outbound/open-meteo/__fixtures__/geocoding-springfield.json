@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "id": 4409896,
+      "name": "Springfield",
+      "latitude": 37.21533,
+      "longitude": -93.29824,
+      "country": "United States",
+      "admin1": "Missouri",
+      "timezone": "America/Chicago",
+      "population": 169176
+    },
+    {
+      "id": 4250542,
+      "name": "Springfield",
+      "latitude": 39.80172,
+      "longitude": -89.64371,
+      "country": "United States",
+      "admin1": "Illinois",
+      "timezone": "America/Chicago",
+      "population": 114230
+    },
+    {
+      "id": 4951788,
+      "name": "Springfield",
+      "latitude": 42.10148,
+      "longitude": -72.58981,
+      "country": "United States",
+      "admin1": "Massachusetts",
+      "timezone": "America/New_York",
+      "population": 153060
+    }
+  ]
+}

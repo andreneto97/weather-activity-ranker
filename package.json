@@ -1,0 +1,36 @@
+{
+  "name": "weather-activities",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Weather-based activity ranker — Lead Engineer take-home",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "pnpm -r test",
+    "test:cov": "pnpm -r test:cov",
+    "build": "pnpm --filter @wa/server build:schema && pnpm --filter @wa/contracts codegen && pnpm -r --parallel build",
+    "dev": "pnpm -r --parallel dev",
+    "e2e": "pnpm --filter @wa/web e2e",
+    "clean": "pnpm -r --parallel exec rm -rf dist coverage .tsbuildinfo && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@apollo/protobufjs",
+      "@biomejs/biome",
+      "@swc/core",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}

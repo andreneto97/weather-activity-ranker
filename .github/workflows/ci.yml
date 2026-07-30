@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Deterministic behaviour for downstream tooling.
+  CI: 'true'
+  # Silences Fastify/pino noise during test output.
+  LOG_LEVEL: silent
+
+jobs:
+  quality:
+    name: typecheck · lint · unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Contracts codegen must run BEFORE typecheck/lint because @wa/web reads
+      # from packages/web/src/gql/ (git-ignored, generated on demand).
+      - name: Emit GraphQL SDL + generate frontend types
+        run: |
+          pnpm --filter @wa/server build:schema
+          pnpm --filter @wa/contracts codegen
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit + integration tests
+        run: pnpm --filter @wa/server test -- --coverage
+
+      - name: Pact consumer test (writes packages/web/pacts/*.json)
+        run: pnpm --filter @wa/web test:pact
+
+      - name: Pact provider verification
+        run: pnpm --filter @wa/server test -- tests/pact/verify.test.ts
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-coverage
+          path: packages/server/coverage/
+          if-no-files-found: warn
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Emit SDL + codegen
+        run: |
+          pnpm --filter @wa/server build:schema
+          pnpm --filter @wa/contracts codegen
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @wa/web exec playwright install --with-deps chromium
+
+      - name: Run E2E (stub Open-Meteo)
+        env:
+          OPEN_METEO_MODE: stub
+        run: pnpm --filter @wa/web test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/web/playwright-report/
+          retention-days: 7
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (emit SDL, codegen, tsc, vite)
+        run: pnpm build

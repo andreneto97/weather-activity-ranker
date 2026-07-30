@@ -1,0 +1,150 @@
+# GENERATED FILE — do not edit by hand.
+#
+# Emitted by `pnpm --filter @wa/server build:schema` from the Pothos schema
+# in packages/server/src/adapters/inbound/graphql. Consumed by
+# @wa/contracts (codegen) and any external client. See spec 04.
+
+"""Kinds of activities we score."""
+enum ActivityKind {
+  INDOOR_SIGHTSEEING
+  OUTDOOR_SIGHTSEEING
+  SKIING
+  SURFING
+}
+
+"""7-day scoring for one activity in one city."""
+type ActivityRanking {
+  activity: ActivityKind!
+  bestDay: DailyScore!
+  dailyScores: [DailyScore!]!
+
+  """0..100, mean of the top-3 daily scores."""
+  overallScore: Int!
+}
+
+"""Success shape for the top-level query."""
+type ActivityRankings {
+  city: Location!
+
+  """ISO 8601 timestamp."""
+  generatedAt: String!
+
+  """Sorted by overallScore descending."""
+  rankings: [ActivityRanking!]!
+
+  """Human-readable summary, either template or Claude-generated."""
+  summary: String!
+}
+
+union ActivityRankingsResult = ActivityRankings | AmbiguousLocationError | CityNotFoundError | UpstreamUnavailableError
+
+type AmbiguousLocationError implements DomainError {
+  """Top 5 candidates sorted by population descending."""
+  candidates: [Location!]!
+  code: String!
+  message: String!
+}
+
+type CityNotFoundError implements DomainError {
+  code: String!
+  message: String!
+  query: String!
+}
+
+"""Score for a single day."""
+type DailyScore {
+  """ISO date (YYYY-MM-DD) in the city's local timezone."""
+  date: String!
+  score: Score!
+
+  """
+  Raw forecast for the day. Null only when the scorer threw and the ranking is a placeholder (see safeRank).
+  """
+  weather: DayWeather
+}
+
+"""
+Raw daily forecast (WMO code, min/max temp, precipitation, wind, cloud cover). Used by the DayCard / DayDetail UI to render a matching icon and narrative.
+"""
+type DayWeather {
+  """Mean daily cloud cover (0..100)."""
+  cloudCoverPct: Int!
+
+  """Peak precipitation probability across the day (0..100)."""
+  precipitationProbabilityMaxPct: Int!
+
+  """Daily maximum temperature in Celsius."""
+  tempMaxC: Float!
+
+  """Daily minimum temperature in Celsius."""
+  tempMinC: Float!
+
+  """WMO weather-interpretation code (0..99)."""
+  weatherCode: Int!
+
+  """Peak wind speed in km/h."""
+  windMaxKmh: Float!
+}
+
+"""Common shape for all domain errors."""
+interface DomainError {
+  code: String!
+  message: String!
+}
+
+"""A resolved geographic location."""
+type Location {
+  admin1: String
+  country: String!
+  id: ID!
+  latitude: Float!
+  longitude: Float!
+  name: String!
+  population: Int
+  timezone: String!
+}
+
+type Query {
+  """
+  Score all four activities for a city over the next 7 days. Provide either `cityQuery` (which will geocode + disambiguate) or `locationId` (obtained from a previous AmbiguousLocationError.candidates entry to skip geocoding).
+  """
+  activityRankings(cityQuery: String, locationId: ID): ActivityRankingsResult!
+
+  """Search for locations by name. Used by the command palette (typeahead)."""
+  geocode(limit: Int = 5, query: String!): [Location!]!
+}
+
+"""A 0..100 desirability score plus its breakdown."""
+type Score {
+  components: [ScoreComponent!]!
+
+  """
+  True when this activity does not apply for this day/location — the domain returns `notApplicableScore(reason)`, e.g. surfing inland or when the marine feed had a gap for this day. Frontend should render an N/A placeholder rather than a 0-score card.
+  """
+  notApplicable: Boolean!
+
+  """
+  Human-readable reason present when `notApplicable` is true; otherwise null (e.g. 'No coastal access').
+  """
+  notApplicableReason: String
+  value: Int!
+}
+
+"""One contributing factor of a score, e.g. 'fresh snow' or 'low wind'."""
+type ScoreComponent {
+  label: String!
+
+  """0..1 normalized contribution."""
+  value: Float!
+
+  """0..1 weight of this component in the overall score."""
+  weight: Float!
+}
+
+type UpstreamUnavailableError implements DomainError {
+  code: String!
+  message: String!
+
+  """e.g. 'open-meteo-forecast', 'open-meteo-geocoding'."""
+  provider: String!
+}

@@ -1,0 +1,38 @@
+# Local-only compose: run the production image against the real Open-Meteo,
+# or flip OPEN_METEO_MODE=stub for a wholly-offline demo.
+#
+#   docker compose up --build
+services:
+  app:
+    build: .
+    ports:
+      - '8080:8080'
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      LOG_LEVEL: info
+      OPEN_METEO_MODE: ${OPEN_METEO_MODE:-live}
+      OPEN_METEO_TIMEOUT_MS: '3000'
+      CORS_ORIGIN: 'http://localhost:8080'
+      CACHE_TTL_WEATHER_MS: '1800000'
+      CACHE_TTL_MARINE_MS: '1800000'
+      CACHE_TTL_AQI_MS: '1800000'
+      CACHE_TTL_GEOCODING_MS: '86400000'
+      RATE_LIMIT_MAX: '60'
+      RATE_LIMIT_WINDOW_MS: '60000'
+      # Opt-in only — the template summarizer is the safe default.
+      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # SUMMARIZER_DAILY_CAP: '100'
+    healthcheck:
+      # Matches the Dockerfile HEALTHCHECK — uses Node's built-in fetch so the
+      # image doesn't need wget. Otherwise `docker compose up --build` would
+      # report unhealthy immediately (Alpine base has no wget in our runtime).
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3

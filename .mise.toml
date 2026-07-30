@@ -1,0 +1,6 @@
+# mise runtime pinning — https://mise.jdx.dev/
+# Install: `curl https://mise.run | sh` then `mise install`
+
+[tools]
+node = "22"
+pnpm = "10"
